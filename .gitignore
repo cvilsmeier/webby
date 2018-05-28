@@ -1,4 +1,2 @@
-build/
-bin/
-web/WEB-INF/classes
-
+/bin/
+/build/
