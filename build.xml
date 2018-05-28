@@ -1,0 +1,62 @@
+
+<project name="webby" default="rebuild-all" basedir=".">
+
+	<target name="init">
+		<property name="version" value="1.0.0"/> <!-- sync version with changelog.txt -->
+	</target>
+	
+	<target name="clean" depends="init">
+		<delete dir="build"/>
+		<mkdir dir="build"/>
+	</target>
+
+	<target name="compile" depends="init" >
+		<mkdir dir="build/compile"/>
+		<javac destdir="build/compile" debug="true" includeantruntime="false">
+			<classpath>
+				<fileset dir="lib-dev" includes="*.jar"/>
+				<fileset dir="lib"     includes="*.jar"/>
+			</classpath>
+			<src path="src/main/java"/>
+		</javac>
+		<copy todir="build/compile" >
+			<fileset dir="src/main/java" excludes="**/*.java"/>
+		</copy>
+	</target>
+
+	<target name="jar" depends="init, compile" >
+		<jar jarfile="build/webby-${version}.jar" update="false">
+			<fileset dir="build/compile"/>
+		</jar>
+	</target>
+
+	<target name="jar-src" depends="init" >
+		<jar jarfile="build/webby-${version}-src.jar" update="false">
+			<fileset dir="src"/>
+		</jar>
+	</target>
+
+	<target name="dist" depends="init, jar, jar-src" >
+		<zip zipfile="build/webby-${version}-dist.zip" update="false">
+			<zipfileset prefix="webby-${version}/lib" dir="build" includes="webby-${version}.jar" />
+			<zipfileset prefix="webby-${version}/lib" dir="lib" />
+			<zipfileset prefix="webby-${version}/src" dir="build" includes="webby-${version}-src.jar" />
+		</zip>
+	</target>
+
+	<!--
+	<target name="war" depends="init, jar">
+		<war warfile="build/aqui.war" update="false">
+			<zipfileset dir="web" excludes="WEB-INF/classes/**"/>
+			<zipfileset prefix="WEB-INF/lib"  file="build/aqui.jar"/>
+		</war>
+		<war warfile="build/aqui-no-libs.war" update="false">
+			<zipfileset dir="web" excludes="WEB-INF/classes/**, WEB-INF/lib/*"/>
+			<zipfileset prefix="WEB-INF/lib"  file="build/aqui.jar"/>
+		</war>
+	</target>
+	-->
+
+	<target name="rebuild-all" depends="init, clean, jar, jar-src, dist" />
+		
+</project>
