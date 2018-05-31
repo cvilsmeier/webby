@@ -35,9 +35,8 @@ public class WebbyServlet extends HttpServlet {
 			ServletContext servletContext = servletConfig.getServletContext();
 			AppContextImpl appContext = new AppContextImpl(servletContext);
 			String appClass = servletConfig.getInitParameter("appClass");
-			Constructor<?> ctor = Class.forName(appClass).getConstructor();
-			this.app = (App) ctor.newInstance();
-			this.app.init(appContext);
+			Constructor<?> ctor = Class.forName(appClass).getConstructor(AppContext.class);
+			this.app = (App) ctor.newInstance(appContext);
 			// velocity
 			String templatePath = getServletContext().getRealPath("/WEB-INF/templates");
 			Properties velocityProperties = new Properties();
@@ -78,9 +77,6 @@ public class WebbyServlet extends HttpServlet {
 		if (path == null) {
 			path = "";
 		}
-		if( path.startsWith("/") ) {
-			path = path.substring(1);
-		}
 		// serve request
 		long t1 = System.nanoTime();
 		WebRequestImpl req = new WebRequestImpl(method, path, httpRequest);
@@ -97,6 +93,7 @@ public class WebbyServlet extends HttpServlet {
 		// send response
 		if (req.getTemplate() != null) {
 			VelocityContext ctx = new VelocityContext();
+			ctx.put("req", req);
 			for (String k : req.getModel().keySet()) {
 				ctx.put(k, req.getModel().get(k));
 			}

@@ -1,12 +1,12 @@
 package org.webby;
 
 /**
- * Classes implementing this interface must have an empty constructor.
+ * Classes implementing this interface must have a constructor that has a <code>AppContext</code> argument.
  * Example:
  * <pre>
  * public class MyApp implements App {
  *   
- *   public MyApp() {
+ *   public MyApp(AppContext appcontext) throws Exception {
  *   }
  *   
  *   ...
@@ -14,8 +14,6 @@ package org.webby;
  * </pre>
  */
 public interface App {
-
-	void init(AppContext appContext) throws Exception;
 
 	void serve(WebRequest req) throws Exception;
 	

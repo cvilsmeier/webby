@@ -101,7 +101,7 @@ public class WebRequestImpl implements WebRequest {
 	// attributes
 
 	@Override
-	public void putAttribute(String key, Object value) {
+	public void putAttribute(String key, Object value) {		
 		httpRequest.setAttribute(key, value);
 	}
 
