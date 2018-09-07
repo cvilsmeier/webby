@@ -25,6 +25,8 @@ public class WebRequestImpl implements WebRequest {
 	private Map<String, Object> model = new HashMap<>();
 	// template response
 	private String template = null;
+	// json response
+	private String json = null;
 	// content response
 	private byte[] contentBytes = null;
 	private String contentType = null;
@@ -210,6 +212,7 @@ public class WebRequestImpl implements WebRequest {
 
 	private void resetResponses() {
 		template = null;
+		json = null;
 		contentBytes = null;
 		contentType = null;
 		downloadFile = null;
@@ -223,7 +226,7 @@ public class WebRequestImpl implements WebRequest {
 
 	@Override
 	public boolean hasResponse() {
-		return template != null || contentBytes != null || downloadFile != null || redirect != null || errorStatus != 0;
+		return template != null || json != null || contentBytes != null || downloadFile != null || redirect != null || errorStatus != 0;
 	}
 
 	// model
@@ -267,6 +270,19 @@ public class WebRequestImpl implements WebRequest {
 	public void setTemplate(String template) {
 		resetResponses();
 		this.template = template;
+	}
+
+	// json response
+
+	@Override
+	public String getJson() {
+		return json;
+	}
+
+	@Override
+	public void setJson(String json) {
+		resetResponses();
+		this.json = json;
 	}
 
 	// content response

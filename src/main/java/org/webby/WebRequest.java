@@ -161,6 +161,18 @@ public interface WebRequest {
 	 */
 	String getTemplate();
 
+	// json response
+
+	/**
+	 * Sets the json text.
+	 */
+	void setJson(String json);
+
+	/**
+	 * Returns the json text, may be null if not set.
+	 */
+	String getJson();
+
 	// content response
 
 	/**

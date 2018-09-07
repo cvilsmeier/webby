@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
@@ -101,6 +102,14 @@ public class WebbyServlet extends HttpServlet {
 			httpResponse.setCharacterEncoding("UTF-8");
 			PrintWriter out = httpResponse.getWriter();
 			velocityEngine.mergeTemplate(req.getTemplate(), "UTF-8", ctx, out);
+			out.flush();
+			httpResponse.flushBuffer();
+		} else if (req.getJson() != null) {
+			httpResponse.setContentType("application/json");
+			httpResponse.setCharacterEncoding("UTF-8");
+			ServletOutputStream out = httpResponse.getOutputStream();			
+			byte[] data = req.getJson().getBytes(StandardCharsets.UTF_8);
+			out.write(data);
 			out.flush();
 			httpResponse.flushBuffer();
 		} else if (req.getContentBytes() != null) {

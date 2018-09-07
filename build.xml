@@ -2,7 +2,7 @@
 <project name="webby" default="rebuild-all" basedir=".">
 
 	<target name="init">
-		<property name="version" value="1.0.0"/> <!-- sync version with changelog.txt -->
+		<property name="version" value="1.0.0"/> <!-- sync version in README.md and changelog.txt -->
 	</target>
 	
 	<target name="clean" depends="init">

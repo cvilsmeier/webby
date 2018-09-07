@@ -14,4 +14,14 @@ public abstract class Escaper {
 		return s;
 	}
 	
+	public static String escapeJs(Object input) {
+		if ( input == null ) {
+			return "";
+		}
+		String s = input.toString();
+		s = s.replace("\"", "\\\"");
+		s = s.replace("\'", "\\\'");
+		return s;
+	}
+	
 }
