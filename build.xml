@@ -41,6 +41,7 @@
 			<zipfileset prefix="webby-${version}/lib" dir="build" includes="webby-${version}.jar" />
 			<zipfileset prefix="webby-${version}/lib" dir="lib" />
 			<zipfileset prefix="webby-${version}/src" dir="build" includes="webby-${version}-src.jar" />
+			<zipfileset prefix="webby-${version}/src" dir="src" includes="*-sources.jar" />
 		</zip>
 	</target>
 
