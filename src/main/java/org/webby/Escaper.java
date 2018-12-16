@@ -3,7 +3,7 @@ package org.webby;
 public abstract class Escaper {
 
 	public static String escapeHtml(Object input) {
-		if ( input == null ) {
+		if (input == null) {
 			return "";
 		}
 		String s = input.toString();
@@ -13,9 +13,9 @@ public abstract class Escaper {
 		s = s.replace("\"", "&quot;");
 		return s;
 	}
-	
+
 	public static String escapeJs(Object input) {
-		if ( input == null ) {
+		if (input == null) {
 			return "";
 		}
 		String s = input.toString();
@@ -23,5 +23,5 @@ public abstract class Escaper {
 		s = s.replace("\'", "\\\'");
 		return s;
 	}
-	
+
 }

@@ -6,17 +6,19 @@ package org.webby;
  * <pre>
  * public class MyApp implements App {
  *   
- *   public MyApp(AppContext appcontext) throws Exception {
+ *   public MyApp(AppContext context) throws Exception {
  *   }
  *   
  *   ...
  * }
  * </pre>
+ * 
+ * @see AppContext
  */
 public interface App {
 
 	void serve(WebRequest req) throws Exception;
-	
+
 	void destroy();
 
 }

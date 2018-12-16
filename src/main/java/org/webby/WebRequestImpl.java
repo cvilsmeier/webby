@@ -34,6 +34,7 @@ public class WebRequestImpl implements WebRequest {
 	private File downloadFile = null;
 	private String downloadName = null;
 	private String downloadContentType = null;
+	private boolean downloadAsAttachment = false;
 	private boolean downloadDeleteAfterDownload = false;
 	// redirect response
 	private String redirect = null;
@@ -87,7 +88,19 @@ public class WebRequestImpl implements WebRequest {
 	@Override
 	public String getParameter(String name, String defaultValue) {
 		String v = httpRequest.getParameter(name);
-		return v != null ? v : defaultValue;
+		if (v == null) {
+			v = defaultValue;
+		}
+		return v;
+	}
+
+	@Override
+	public String[] getParameterValues(String name) {
+		String[] values = httpRequest.getParameterValues(name);
+		if (values == null) {
+			values = new String[0];
+		}
+		return values;
 	}
 
 	@Override
@@ -103,7 +116,7 @@ public class WebRequestImpl implements WebRequest {
 	// attributes
 
 	@Override
-	public void putAttribute(String key, Object value) {		
+	public void putAttribute(String key, Object value) {
 		httpRequest.setAttribute(key, value);
 	}
 
@@ -177,8 +190,8 @@ public class WebRequestImpl implements WebRequest {
 	@Override
 	public String getCookieValue(String cookieName) {
 		String value = getCookieValue(cookieName, null);
-		if( value == null ) {
-			throw new RuntimeException("cookie name '"+cookieName+"' not found");
+		if (value == null) {
+			throw new RuntimeException("cookie name '" + cookieName + "' not found");
 		}
 		return value;
 	}
@@ -321,11 +334,12 @@ public class WebRequestImpl implements WebRequest {
 	// download response
 
 	@Override
-	public void setDownload(File file, String name, String contentType, boolean deleteAfterDownload) {
+	public void setDownload(File file, String name, String contentType, boolean asAttachment, boolean deleteAfterDownload) {
 		resetResponses();
 		this.downloadFile = file;
 		this.downloadName = name;
 		this.downloadContentType = contentType;
+		this.downloadAsAttachment = asAttachment;
 		this.downloadDeleteAfterDownload = deleteAfterDownload;
 	}
 
@@ -342,6 +356,11 @@ public class WebRequestImpl implements WebRequest {
 	@Override
 	public String getDownloadContentType() {
 		return downloadContentType;
+	}
+
+	@Override
+	public boolean isDownloadAsAttachment() {
+		return downloadAsAttachment;
 	}
 
 	@Override

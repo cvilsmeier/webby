@@ -2,11 +2,18 @@
 # webby
 
 Webby is a simple web library for Java. It's based on the J2EE Servlet 
-API (v3.1) and uses Apache Velocity for rendering HTML.
+API (v4.0) and uses Apache Velocity for rendering HTML.
 
+Webby v1.0.0 is still available in the 'v1' branch.
 
 
 ## Changelog
+
+
+### 2.0.0
+- replace log4j by slf4j v1.7.25
+- upgrade velocity v2.0
+- upgrade servlet-api to v4.0.1
 
 
 ### 1.0.0

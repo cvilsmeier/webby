@@ -8,7 +8,8 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 
 /**
- * A WebRequest represents an incoming HTTP request.
+ * A WebRequest represents an incoming HTTP request
+ * and provides methods to set HTTP response data.
  */
 public interface WebRequest {
 
@@ -48,6 +49,11 @@ public interface WebRequest {
 	 * Returns a named parameter, or a default value if the parameter is not found.
 	 */
 	String getParameter(String name, String defaultValue);
+
+	/**
+	 * Returns a named list parameter, or an empty array if the parameter is not found.
+	 */
+	String[] getParameterValues(String name);
 
 	/**
 	 * Returns a file upload paramter or null.
@@ -205,7 +211,7 @@ public interface WebRequest {
 	/**
 	 * Sets a download response.
 	 */
-	void setDownload(File file, String name, String contentType, boolean deleteAfterDownload);
+	void setDownload(File file, String name, String contentType, boolean asAttachment, boolean deleteAfterDownload);
 
 	/**
 	 * Returns the download file, may be null if not set.
@@ -221,6 +227,11 @@ public interface WebRequest {
 	 * Returns the download content type, may be null if not set.
 	 */
 	String getDownloadContentType();
+
+	/**
+	 * Returns true if the download file should be downloaded with content-disposition attachment.
+	 */
+	boolean isDownloadAsAttachment();
 
 	/**
 	 * Returns true if the download file should be deleted after download.

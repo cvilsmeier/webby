@@ -19,6 +19,11 @@ public class AppContextImpl implements AppContext {
 	}
 
 	@Override
+	public String getRealPath(String path) {
+		return servletContext.getRealPath(path);
+	}
+
+	@Override
 	public InputStream getResourceAsStream(String path) {
 		return servletContext.getResourceAsStream(path);
 	}

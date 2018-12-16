@@ -17,14 +17,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebbyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private App app = null;
 	private VelocityEngine velocityEngine = null;
 
@@ -41,12 +42,14 @@ public class WebbyServlet extends HttpServlet {
 			// velocity
 			String templatePath = getServletContext().getRealPath("/WEB-INF/templates");
 			Properties velocityProperties = new Properties();
-			velocityProperties.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
-			velocityProperties.setProperty("runtime.log.logsystem.log4j.category", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
+			//			velocityProperties.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystemSimpleLog4JLogSystemSimpleLog4JLogSystemSimpleLog4JLogSystem");
+			//			velocityProperties.setProperty("runtime.log.logsystem.log4j.category", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
 			velocityProperties.setProperty("resource.loader", "file");
 			velocityProperties.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
 			velocityProperties.setProperty("file.resource.loader.path", templatePath);
-			velocityProperties.setProperty("file.resource.loader.cache", "false");
+			String velocityCache = servletConfig.getInitParameter("velocityCache");
+			velocityCache = "true".equals(velocityCache) ? "true" : "false";
+			velocityProperties.setProperty("file.resource.loader.cache", velocityCache);
 			velocityProperties.setProperty("input.encoding", "UTF-8");
 			velocityProperties.setProperty("output.encoding", "UTF-8");
 			this.velocityEngine = new VelocityEngine(velocityProperties);
@@ -74,7 +77,9 @@ public class WebbyServlet extends HttpServlet {
 	private void doGetOrPost(String method, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
 		httpRequest.setCharacterEncoding("UTF-8");
 		String path = httpRequest.getPathInfo();
-		logger.trace(method + " " + path);
+		if( logger.isTraceEnabled() ) {
+			logger.trace(method + " " + path);
+		}
 		if (path == null) {
 			path = "";
 		}
@@ -107,7 +112,7 @@ public class WebbyServlet extends HttpServlet {
 		} else if (req.getJson() != null) {
 			httpResponse.setContentType("application/json");
 			httpResponse.setCharacterEncoding("UTF-8");
-			ServletOutputStream out = httpResponse.getOutputStream();			
+			ServletOutputStream out = httpResponse.getOutputStream();
 			byte[] data = req.getJson().getBytes(StandardCharsets.UTF_8);
 			out.write(data);
 			out.flush();
@@ -122,7 +127,9 @@ public class WebbyServlet extends HttpServlet {
 		} else if (req.getDownloadFile() != null) {
 			File file = req.getDownloadFile();
 			httpResponse.setContentType(req.getDownloadContentType());
-			httpResponse.setHeader("Content-disposition", "attachment; filename=" + req.getDownloadName());
+			if( req.isDownloadAsAttachment() ) {
+				httpResponse.setHeader("Content-disposition", "attachment; filename=" + req.getDownloadName());
+			}
 			ServletOutputStream out = httpResponse.getOutputStream();
 			pipeFileToStream(file, out);
 			out.flush();
@@ -136,15 +143,31 @@ public class WebbyServlet extends HttpServlet {
 		} else if (req.getRedirect() != null) {
 			httpResponse.sendRedirect(req.getRedirect());
 		} else if (req.getErrorStatus() != 0) {
-			httpResponse.sendError(req.getErrorStatus(), req.getErrorMessage());
+			httpResponse.setStatus(req.getErrorStatus());
+			String content = "status "+req.getErrorStatus()+": "+req.getErrorMessage()+"\r\n";
+			ServletOutputStream out = httpResponse.getOutputStream();
+			out.write(content.getBytes(StandardCharsets.UTF_8));
+			out.flush();
+			httpResponse.flushBuffer();
 		} else {
-			logger.warn("path \"" + path + "\" did not produce any result");
-			httpResponse.sendError(404, "path \"" + path + "\" did not produce any result");
+			int status = 404;
+			httpResponse.setStatus(status);
+			String content = "status "+status+": path \"" + path + "\" did not produce any result\r\n";
+			ServletOutputStream out = httpResponse.getOutputStream();
+			out.write(content.getBytes(StandardCharsets.UTF_8));
+			out.flush();
+			httpResponse.flushBuffer();
 		}
 		// report duration of this request
 		long t2 = System.nanoTime();
 		long millis = (t2 - t1) / 1_000_000L;
-		logger.info(method + " " + path + " took " + millis + " ms");
+		if( millis > 3000 ) {
+			logger.info(method + " " + path + " took " + millis + " ms");
+		} else {
+			if( logger.isDebugEnabled() ) {
+				logger.debug(method + " " + path + " took " + millis + " ms");
+			}
+		}
 	}
 
 	private void pipeFileToStream(File file, ServletOutputStream out) throws IOException {
