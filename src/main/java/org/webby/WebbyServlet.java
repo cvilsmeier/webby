@@ -42,12 +42,13 @@ public class WebbyServlet extends HttpServlet {
 			// velocity
 			String templatePath = getServletContext().getRealPath("/WEB-INF/templates");
 			Properties velocityProperties = new Properties();
-			//			velocityProperties.setProperty("runtime.log.logsystem.class", "org.apache.velocity.runtime.log.SimpleLog4JLogSystemSimpleLog4JLogSystemSimpleLog4JLogSystemSimpleLog4JLogSystem");
-			//			velocityProperties.setProperty("runtime.log.logsystem.log4j.category", "org.apache.velocity.runtime.log.SimpleLog4JLogSystem");
 			velocityProperties.setProperty("resource.loader", "file");
 			velocityProperties.setProperty("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
 			velocityProperties.setProperty("file.resource.loader.path", templatePath);
 			String velocityCache = servletConfig.getInitParameter("velocityCache");
+			if ( velocityCache == null ) {
+				velocityCache = servletContext.getInitParameter("velocityCache");
+			}
 			velocityCache = "true".equals(velocityCache) ? "true" : "false";
 			velocityProperties.setProperty("file.resource.loader.cache", velocityCache);
 			velocityProperties.setProperty("input.encoding", "UTF-8");
@@ -77,7 +78,7 @@ public class WebbyServlet extends HttpServlet {
 	private void doGetOrPost(String method, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
 		httpRequest.setCharacterEncoding("UTF-8");
 		String path = httpRequest.getPathInfo();
-		if( logger.isTraceEnabled() ) {
+		if (logger.isTraceEnabled()) {
 			logger.trace(method + " " + path);
 		}
 		if (path == null) {
@@ -125,26 +126,32 @@ public class WebbyServlet extends HttpServlet {
 			out.flush();
 			httpResponse.flushBuffer();
 		} else if (req.getDownloadFile() != null) {
-			File file = req.getDownloadFile();
-			httpResponse.setContentType(req.getDownloadContentType());
-			if( req.isDownloadAsAttachment() ) {
-				httpResponse.setHeader("Content-disposition", "attachment; filename=" + req.getDownloadName());
-			}
 			ServletOutputStream out = httpResponse.getOutputStream();
-			pipeFileToStream(file, out);
+			File file = req.getDownloadFile();
+			if (file.isFile()) {
+				httpResponse.setContentType(req.getDownloadContentType());
+				if (req.isDownloadAsAttachment()) {
+					httpResponse.setHeader("Content-disposition", "attachment; filename=" + req.getDownloadName());
+				}
+				pipeFileToStream(file, out);
+				if (req.isDownloadDeleteAfterDownload()) {
+					boolean deleted = file.delete();
+					if (!deleted) {
+						logger.warn("could not delete download file " + file);
+					}
+				}
+			} else {
+				httpResponse.setStatus(404);
+				String content = "status 404: download file not found: \"" + file.getName() + "\"\r\n";
+				out.write(content.getBytes(StandardCharsets.UTF_8));
+			}
 			out.flush();
 			httpResponse.flushBuffer();
-			if (req.isDownloadDeleteAfterDownload()) {
-				boolean deleted = file.delete();
-				if (!deleted) {
-					logger.warn("could not delete download file " + file);
-				}
-			}
 		} else if (req.getRedirect() != null) {
 			httpResponse.sendRedirect(req.getRedirect());
 		} else if (req.getErrorStatus() != 0) {
 			httpResponse.setStatus(req.getErrorStatus());
-			String content = "status "+req.getErrorStatus()+": "+req.getErrorMessage()+"\r\n";
+			String content = "status " + req.getErrorStatus() + ": " + req.getErrorMessage() + "\r\n";
 			ServletOutputStream out = httpResponse.getOutputStream();
 			out.write(content.getBytes(StandardCharsets.UTF_8));
 			out.flush();
@@ -152,7 +159,7 @@ public class WebbyServlet extends HttpServlet {
 		} else {
 			int status = 404;
 			httpResponse.setStatus(status);
-			String content = "status "+status+": path \"" + path + "\" did not produce any result\r\n";
+			String content = "status " + status + ": path \"" + path + "\" did not produce any result\r\n";
 			ServletOutputStream out = httpResponse.getOutputStream();
 			out.write(content.getBytes(StandardCharsets.UTF_8));
 			out.flush();
@@ -161,10 +168,10 @@ public class WebbyServlet extends HttpServlet {
 		// report duration of this request
 		long t2 = System.nanoTime();
 		long millis = (t2 - t1) / 1_000_000L;
-		if( millis > 3000 ) {
+		if (millis > 3000) {
 			logger.info(method + " " + path + " took " + millis + " ms");
 		} else {
-			if( logger.isDebugEnabled() ) {
+			if (logger.isDebugEnabled()) {
 				logger.debug(method + " " + path + " took " + millis + " ms");
 			}
 		}

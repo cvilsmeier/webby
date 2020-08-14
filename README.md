@@ -9,6 +9,12 @@ Webby v1.0.0 is still available in the 'v1' branch.
 
 ## Changelog
 
+Sync version in README.md and build.xml
+
+### 2.0.1
+- velocityCache can now be configured in ServletConfig and ServletContext (instead of only in ServletConfig) 
+- fixed file download for file-not-found case 
+
 
 ### 2.0.0
 - replace log4j by slf4j v1.7.25

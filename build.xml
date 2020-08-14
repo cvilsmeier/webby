@@ -2,7 +2,7 @@
 <project name="webby" default="rebuild-all" basedir=".">
 
 	<target name="init">
-		<property name="version" value="2.0.0"/> <!-- sync version in README.md and changelog.txt -->
+		<property name="version" value="2.0.1"/> <!-- Sync version in README.md and build.xml -->
 	</target>
 	
 	<target name="clean" depends="init">
@@ -40,6 +40,7 @@
 		<zip zipfile="build/webby-${version}-dist.zip" update="false">
 			<zipfileset prefix="webby-${version}/lib" dir="build" includes="webby-${version}.jar" />
 			<zipfileset prefix="webby-${version}/lib" dir="lib" />
+			<zipfileset prefix="webby-${version}/lib-dev" dir="lib-dev" />
 			<zipfileset prefix="webby-${version}/src" dir="build" includes="webby-${version}-src.jar" />
 			<zipfileset prefix="webby-${version}/src" dir="src" includes="*-sources.jar" />
 		</zip>
